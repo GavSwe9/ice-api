@@ -82,6 +82,12 @@ functions:
      - httpApi:
           path: /get-player-shots
           method: get
+  getLineStats:
+    handler: bin/get-line-stats
+    events:
+     - httpApi:
+          path: /get-line-stats
+          method: post
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
