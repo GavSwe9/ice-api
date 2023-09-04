@@ -23,6 +23,7 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: go1.x
+  stage: dev
 
   iam:
     role:
@@ -32,8 +33,6 @@ provider:
             - secretsmanager:GetSecretValue
           Resource: arn:aws:secretsmanager:us-east-1:271463937680:secret:farm/mysql-Rpzei2
 
-# you can overwrite defaults here
-#  stage: dev
 #  region: us-east-1
 
 # you can add statements to the Lambda function's IAM Role here
@@ -64,29 +63,35 @@ package:
     - ./bin/**
 
 functions:
-  hello:
-    handler: bin/hello
-    events:
-      - httpApi:
-          path: /hello
-          method: get
-  world:
-    handler: bin/world
-    events:
-      - httpApi:
-          path: /world
-          method: get
   getPlayerShots:
     handler: bin/get-player-shots
     events:
      - httpApi:
-          path: /get-player-shots
+          path: /get-player-shots/{playerId}
+          method: get
+  getTeamStats:
+    handler: bin/get-team-stats
+    events:
+     - httpApi:
+          path: /get-team-stats/{teamId}
           method: get
   getLineStats:
     handler: bin/get-line-stats
     events:
      - httpApi:
           path: /get-line-stats
+          method: post
+  getSeasonTeams:
+    handler: bin/get-season-teams
+    events:
+     - httpApi:
+          path: /get-season-teams/{season}
+          method: get
+  getLinePlaysWith:
+    handler: bin/get-line-plays-with
+    events:
+      - httpApi:
+          path: /get-line-plays-with
           method: post
 
 #    The following are a few example events you can configure
