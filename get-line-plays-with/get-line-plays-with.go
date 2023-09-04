@@ -22,10 +22,10 @@ type RequestBody struct {
 }
 
 type LinePlaysWithPlayer struct {
-	PlayerId         int `json:"player_id"`
-	PercentageEvents int `json:"percentage_events"`
-	PlayerName       int `json:"player_name"`
-	Position         int `json:"position"`
+	PlayerId         int     `json:"player_id"`
+	PercentageEvents float32 `json:"percentage_events"`
+	PlayerName       string  `json:"player_name"`
+	Position         string  `json:"position"`
 }
 
 func Handler(request events.APIGatewayProxyRequest) (Response, error) {
@@ -88,7 +88,7 @@ func queryPart2(playerIds []int) string {
 		whereClause = append(whereClause, playerWhereClause(playerId))
 	}
 
-	return "\nWHERE " + strings.Join(whereClause, " AND ")
+	return "\n" + strings.Join(whereClause, " AND ")
 }
 
 func playerWhereClause(playerId int) string {
@@ -112,6 +112,8 @@ func playerWhereClause(playerId int) string {
 
 func queryPart3(team_id int, playerIds []int) string {
 	return fmt.Sprintf(`
+		), 
+		
 		plays AS (
 			SELECT 
 			
@@ -180,8 +182,6 @@ func queryPart3(team_id int, playerIds []int) string {
 
 		SELECT 
 		sc.skater_id as player_id,
-		sc.total,
-		(SELECT total from total_events),
 		sc.total / (SELECT total from total_events) AS percentage_events,
 		p.player_name,
 		p.position
@@ -196,4 +196,8 @@ func queryPart3(team_id int, playerIds []int) string {
 
 func main() {
 	lambda.Start(Handler)
+
+	// body := "{\"season\":20222023, \"teamId\":22, \"playerIds\": [8478402, 8477934]}"
+
+	// Handler(events.APIGatewayProxyRequest{Body: body})
 }
