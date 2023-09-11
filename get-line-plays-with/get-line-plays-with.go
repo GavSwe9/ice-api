@@ -79,7 +79,7 @@ func queryPart1(season int) string {
 	WITH group_skater_lines AS (
 	SELECT sl.*
 	FROM season_skater_lines sl 
-	WHERE sl.season = %s AND `, strconv.Itoa(season))
+	WHERE sl.season = %s `, strconv.Itoa(season))
 }
 
 func queryPart2(playerIds []int) string {
@@ -88,7 +88,7 @@ func queryPart2(playerIds []int) string {
 		whereClause = append(whereClause, playerWhereClause(playerId))
 	}
 
-	return "\n" + strings.Join(whereClause, " AND ")
+	return "\n AND " + strings.Join(whereClause, " AND ")
 }
 
 func playerWhereClause(playerId int) string {

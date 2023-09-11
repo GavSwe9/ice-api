@@ -14,35 +14,30 @@ import (
 
 type Response events.APIGatewayProxyResponse
 
-type RequestBody struct {
-	TeamId int `json:"teamId"`
-}
-
 type LineStats struct {
-	// TEAM|GOAL|SHOT|HIT|TAKEAWAY|BLOCKED_SHOT|MISSED_SHOT|GIVEAWAY|PENALTY|MISSED_SHOT
-	Team         int `json:"team"`
-	Goals        int `json:"goals"`
-	Shots        int `json:"shots"`
-	Hits         int `json:"hits"`
-	Takeaways    int `json:"takeaways"`
-	BlockedShots int `json:"blocked_shots"`
-	MissedShots  int `json:"missed_shots"`
-	Giveaways    int `json:"giveaways"`
-	Penalties    int `json:"penalties"`
+	TeamName     string `json:"teamName"`
+	TeamId       int    `json:"teamId"`
+	Goals        int    `json:"goals"`
+	Shots        int    `json:"shots"`
+	Hits         int    `json:"hits"`
+	Takeaways    int    `json:"takeaways"`
+	BlockedShots int    `json:"blockedShots"`
+	MissedShots  int    `json:"missedShots"`
+	Giveaways    int    `json:"giveaways"`
+	Penalties    int    `json:"penalties"`
 }
 
 func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 	db := database.GetDatabase()
 
-	var requestBody RequestBody
-	json.Unmarshal([]byte(request.Body), &requestBody)
-
 	teamId, err := strconv.Atoi(request.PathParameters["teamId"])
+	season, err := strconv.Atoi(request.PathParameters["season"])
+
 	if err != nil {
 		log.Fatal("TeamId must be integer")
 	}
 
-	query := query(teamId)
+	query := query(teamId, season)
 	results, err := db.Query(query)
 
 	if err != nil {
@@ -54,7 +49,8 @@ func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 	for results.Next() {
 		var lineStatRow LineStats
 		results.Scan(
-			&lineStatRow.Team,
+			&lineStatRow.TeamName,
+			&lineStatRow.TeamId,
 			&lineStatRow.Goals,
 			&lineStatRow.Shots,
 			&lineStatRow.Hits,
@@ -87,36 +83,58 @@ func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 	return resp, nil
 }
 
-func query(teamId int) string {
+func query(teamId int, season int) string {
 	return fmt.Sprintf(`
-	with plays AS (
-		SELECT 
-		pbp.*
-		FROM play_by_play pbp  
-		LEFT JOIN games g on pbp.game_pk = g.game_pk
-		WHERE 
-		g.away_team_id = %s
-		OR g.home_team_id = %s
-	)
+		with plays AS (
+			SELECT 
+			pbp.*
+			FROM play_by_play pbp  
+			LEFT JOIN games g on pbp.game_pk = g.game_pk
+			WHERE 
+			g.season = %s AND (
+				g.away_team_id = %s 
+				OR g.home_team_id = %s
+			)
+		),
 
-	SELECT 
-	CASE WHEN p.team_id = %s THEN 0 ELSE 1 END AS team,
-	SUM(CASE WHEN p.event_type_id = 'GOAL' THEN 1 ELSE 0 END) AS goal,
-	SUM(CASE WHEN p.event_type_id = 'SHOT' THEN 1 ELSE 0 END) AS shot,
-	SUM(CASE WHEN p.event_type_id = 'HIT' THEN 1 ELSE 0 END) AS hit,
-	SUM(CASE WHEN p.event_type_id = 'TAKEAWAY' THEN 1 ELSE 0 END) AS takeaway,
-	SUM(CASE WHEN p.event_type_id = 'BLOCKED_SHOT' THEN 1 ELSE 0 END) AS blocked_shot,
-	SUM(CASE WHEN p.event_type_id = 'MISSED_SHOT' THEN 1 ELSE 0 END) AS missed_shot,
-	SUM(CASE WHEN p.event_type_id = 'GIVEAWAY' THEN 1 ELSE 0 END) AS giveaway,
-	SUM(CASE WHEN p.event_type_id = 'PENALTY' THEN 1 ELSE 0 END) AS penalty
-	FROM plays p
-	GROUP BY (
-	CASE WHEN p.team_id = %s THEN 0 ELSE 1 END)
+		team_stats AS (
+			SELECT 
+			CASE WHEN p.team_id = %s THEN %s ELSE 0 END AS team_id,
+			SUM(CASE WHEN p.event_type_id = 'GOAL' THEN 1 ELSE 0 END) AS goal,
+			SUM(CASE WHEN p.event_type_id = 'SHOT' THEN 1 ELSE 0 END) AS shot,
+			SUM(CASE WHEN p.event_type_id = 'HIT' THEN 1 ELSE 0 END) AS hit,
+			SUM(CASE WHEN p.event_type_id = 'TAKEAWAY' THEN 1 ELSE 0 END) AS takeaway,
+			SUM(CASE WHEN p.event_type_id = 'BLOCKED_SHOT' THEN 1 ELSE 0 END) AS blocked_shot,
+			SUM(CASE WHEN p.event_type_id = 'MISSED_SHOT' THEN 1 ELSE 0 END) AS missed_shot,
+			SUM(CASE WHEN p.event_type_id = 'GIVEAWAY' THEN 1 ELSE 0 END) AS giveaway,
+			SUM(CASE WHEN p.event_type_id = 'PENALTY' THEN 1 ELSE 0 END) AS penalty
+			FROM plays p
+			GROUP BY (
+			CASE WHEN p.team_id = %s THEN %s ELSE 0 END)
+			ORDER BY (
+				CASE WHEN p.team_id = %s THEN %s ELSE 0 END) DESC
+		)
+
+		SELECT 
+		CASE 
+			WHEN ts.team_id = %s THEN t.name 
+			ELSE 'Opponents'
+		END AS team_name,
+		ts.*
+		FROM team_stats ts
+		LEFT JOIN team_seasons t on ts.team_id = t.team_id AND t.season = %s
 	`,
+		strconv.Itoa(season),
 		strconv.Itoa(teamId),
 		strconv.Itoa(teamId),
 		strconv.Itoa(teamId),
-		strconv.Itoa(teamId))
+		strconv.Itoa(teamId),
+		strconv.Itoa(teamId),
+		strconv.Itoa(teamId),
+		strconv.Itoa(teamId),
+		strconv.Itoa(teamId),
+		strconv.Itoa(teamId),
+		strconv.Itoa(season))
 }
 
 func main() {

@@ -14,10 +14,6 @@ import (
 
 type Response events.APIGatewayProxyResponse
 
-type RequestBody struct {
-	Season int `json:"season"`
-}
-
 type SeasonTeam struct {
 	// season  |team_id|name                 |abbreviation|division_id|division_name|conference_id|conference_name|franchise_id
 	Season         int    `json:"season"`
@@ -33,9 +29,6 @@ type SeasonTeam struct {
 
 func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 	db := database.GetDatabase()
-
-	var requestBody RequestBody
-	json.Unmarshal([]byte(request.Body), &requestBody)
 
 	season, err := strconv.Atoi(request.PathParameters["season"])
 

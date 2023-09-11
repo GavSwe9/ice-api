@@ -101,7 +101,7 @@ func queryPart2(playerIds []int) string {
 		whereClause = append(whereClause, playerWhereClause(playerId))
 	}
 
-	return "\n AND " + strings.Join(whereClause, " AND ")
+	return "\n AND NOT (" + strings.Join(whereClause, " AND ") + ")"
 }
 
 func queryPart3(season int, teamId int) string {
