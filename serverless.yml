@@ -22,7 +22,8 @@ frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: go1.x
+  runtime: provided.al2023
+  architecture: arm64 
   stage: dev
 
   iam:
@@ -58,55 +59,85 @@ provider:
 #    variable1: value1
 
 package:
-  patterns:
-    - '!./**'
-    - ./bin/**
+  individually: true
 
 functions:
   getPlayerShots:
-    handler: bin/get-player-shots
+    handler: bootstrap
+    package:
+      artifact: build/lambda/get-player-shots.zip
     events:
      - httpApi:
           path: /get-player-shots/{playerId}
           method: get
+  getGameShots:
+    handler: bootstrap
+    package:
+      artifact: build/lambda/get-game-shots.zip
+    events:
+     - httpApi:
+          path: /get-game-shots/{gamePk}
+          method: get
   getTeamStats:
-    handler: bin/get-team-stats
+    handler: bootstrap
+    package:
+      artifact: build/lambda/get-team-stats.zip
     events:
      - httpApi:
           path: /get-team-stats/{teamId}/{season}
           method: get
   getLineStats:
-    handler: bin/get-line-stats
+    handler: bootstrap
+    package:
+      artifact: build/lambda/get-line-stats.zip
     events:
      - httpApi:
           path: /get-line-stats
           method: post
   getLineInverseStats:
-    handler: bin/get-line-inverse-stats
+    handler: bootstrap
+    package:
+      artifact: build/lambda/get-line-inverse-stats.zip
     events:
      - httpApi:
           path: /get-line-inverse-stats
           method: post
   getSeasonTeams:
-    handler: bin/get-season-teams
+    handler: bootstrap
+    package:
+      artifact: build/lambda/get-season-teams.zip
     events:
      - httpApi:
           path: /get-season-teams/{season}
           method: get
+  getSeasonTeamsMap:
+    handler: bootstrap
+    package:
+      artifact: build/lambda/get-season-teams-map.zip
+    events:
+     - httpApi:
+          path: /get-season-teams-map/{season}
+          method: get
   getSeasonTeamRoster:
-    handler: bin/get-season-team-roster
+    handler: bootstrap
+    package:
+      artifact: build/lambda/get-season-team-roster.zip
     events:
      - httpApi:
           path: /get-season-team-roster/{teamId}/{season}
           method: get
   getLinePlaysWith:
-    handler: bin/get-line-plays-with
+    handler: bootstrap
+    package:
+      artifact: build/lambda/get-line-plays-with.zip
     events:
       - httpApi:
           path: /get-line-plays-with
           method: post
   getSeasons:
-    handler: bin/get-seasons
+    handler: bootstrap
+    package:
+      artifact: build/lambda/get-seasons.zip
     events:
      - httpApi:
           path: /get-seasons

@@ -17,14 +17,14 @@ type Response events.APIGatewayProxyResponse
 type SeasonTeam struct {
 	// season  |team_id|name                 |abbreviation|division_id|division_name|conference_id|conference_name|franchise_id
 	Season         int    `json:"season"`
-	TeamId         int    `json:"team_id"`
+	TeamId         int    `json:"teamId"`
 	Name           string `json:"name"`
 	Abbreviation   string `json:"abbreviation"`
-	DivisionId     int    `json:"division_id"`
-	DivisionName   string `json:"division_name"`
-	ConferenceId   int    `json:"conference_id"`
-	ConferenceName string `json:"conference_name"`
-	FranchiseId    int    `json:"franchise_id"`
+	DivisionId     int    `json:"divisionId"`
+	DivisionName   string `json:"divisionName"`
+	ConferenceId   int    `json:"conferenceId"`
+	ConferenceName string `json:"conferenceName"`
+	FranchiseId    int    `json:"franchiseId"`
 }
 
 func Handler(request events.APIGatewayProxyRequest) (Response, error) {

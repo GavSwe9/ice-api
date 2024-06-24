@@ -22,9 +22,9 @@ type RequestBody struct {
 }
 
 type LinePlaysWithPlayer struct {
-	PlayerId         int     `json:"player_id"`
-	PercentageEvents float32 `json:"percentage_events"`
-	PlayerName       string  `json:"player_name"`
+	PlayerId         int     `json:"playerId"`
+	PercentageEvents float32 `json:"percentageEvents"`
+	PlayerName       string  `json:"fullName"`
 	Position         string  `json:"position"`
 }
 
@@ -34,7 +34,7 @@ func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 	var requestBody RequestBody
 	json.Unmarshal([]byte(request.Body), &requestBody)
 
-	query := queryPart1(requestBody.Season) + queryPart2(requestBody.PlayerIds) + queryPart3(requestBody.TeamId, requestBody.PlayerIds)
+	query := queryPart1(requestBody.Season, requestBody.TeamId) + queryPart2(requestBody.PlayerIds) + queryPart3(requestBody.TeamId, requestBody.PlayerIds)
 	results, err := db.Query(query)
 
 	if err != nil {
@@ -74,12 +74,12 @@ func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 	return resp, nil
 }
 
-func queryPart1(season int) string {
+func queryPart1(season int, teamId int) string {
 	return fmt.Sprintf(`
 	WITH group_skater_lines AS (
 	SELECT sl.*
-	FROM season_skater_lines sl 
-	WHERE sl.season = %s `, strconv.Itoa(season))
+	FROM team_season_skater_lines sl 
+	WHERE sl.season = %s AND sl.team_id = %s`, strconv.Itoa(season), strconv.Itoa(teamId))
 }
 
 func queryPart2(playerIds []int) string {

@@ -59,6 +59,7 @@ func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 		FROM play_by_play_contributor c
 		LEFT JOIN play_by_play p ON c.game_pk = p.game_pk AND c.event_idx = p.event_idx 
 		WHERE c.player_id = %s
+		AND p.event_type_id <> 'BLOCKED_SHOT'
 		AND c.player_type = 'Shooter'`,
 		strconv.Itoa(playerId)))
 
