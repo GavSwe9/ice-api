@@ -15,30 +15,36 @@ func getRetroBestAvailableOverall(db *sql.DB, pick DraftPick, year int) ([]Retro
 	}
 	defer rows.Close()
 
-	retroPicks := []RetroDraftPick{}
+	var retroPicks = []RetroDraftPick{}
 	for rows.Next() {
 		var retro RetroDraftPick
+
+		// Scan all columns: dp.* (20 columns) + eh.* (5 columns)
 		err := rows.Scan(
+			// draft_picks columns (dp.*)
 			&retro.DraftYear,
 			&retro.OverallPick,
 			&retro.Round,
 			&retro.PickInRound,
+			&retro.TeamID,
 			&retro.TeamAbbrev,
 			&retro.TeamName,
+			&retro.TeamCommonName,
+			&retro.TeamPlaceName,
+			&retro.TeamPickHistory,
 			&retro.FirstName,
 			&retro.LastName,
 			&retro.PositionCode,
 			&retro.CountryCode,
 			&retro.Height,
 			&retro.Weight,
-			&retro.ApiID,
+			&retro.AmateurLeague,
+			&retro.AmateurClubName,
+			&retro.CreatedAt,
+			&retro.UpdatedAt,
+			// evolving_hockey columns (eh.*) - skip duplicate draft_year/overall_pick
+			&retro.NHLID,
 			&retro.TOI,
-			&retro.EvoGAR,
-			&retro.EvdGAR,
-			&retro.PpoGAR,
-			&retro.ShdGAR,
-			&retro.OffGAR,
-			&retro.DefGAR,
 			&retro.GAR,
 			&retro.WAR,
 			&retro.SPAR,
