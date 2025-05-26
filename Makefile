@@ -11,6 +11,10 @@ build:
 	env GOARCH=arm64 GOOS=linux go build -ldflags="-s -w" -o build/lambda/get-line-plays-with/bootstrap get-line-plays-with/*
 	env GOARCH=arm64 GOOS=linux go build -ldflags="-s -w" -o build/lambda/get-seasons/bootstrap get-seasons/*
 	env GOARCH=arm64 GOOS=linux go build -ldflags="-s -w" -o build/lambda/get-season-team-roster/bootstrap get-season-team-roster/*
+	env GOARCH=arm64 GOOS=linux go build -ldflags="-s -w" -o build/lambda/search/bootstrap search/*
+	env GOARCH=arm64 GOOS=linux go build -ldflags="-s -w" -o build/lambda/get-player/bootstrap get-player/*
+	env GOARCH=arm64 GOOS=linux go build -ldflags="-s -w" -o build/lambda/get-team/bootstrap get-team/*
+	env GOARCH=arm64 GOOS=linux go build -ldflags="-s -w" -o build/lambda/get-team-draft/bootstrap get-team-draft/*.go
 
 zip:
 	zip -j build/lambda/get-player-shots.zip build/lambda/get-player-shots/bootstrap
@@ -23,9 +27,13 @@ zip:
 	zip -j build/lambda/get-line-plays-with.zip build/lambda/get-line-plays-with/bootstrap
 	zip -j build/lambda/get-seasons.zip build/lambda/get-seasons/bootstrap
 	zip -j build/lambda/get-season-team-roster.zip build/lambda/get-season-team-roster/bootstrap
+	zip -j build/lambda/search.zip build/lambda/search/bootstrap
+	zip -j build/lambda/get-player.zip build/lambda/get-player/bootstrap
+	zip -j build/lambda/get-team.zip build/lambda/get-team/bootstrap
+	zip -j build/lambda/get-team-draft.zip build/lambda/get-team-draft/bootstrap
 
 clean:
 	rm -rf ./bin
 
-deploy: clean build
+deploy: clean build zip
 	sls deploy --verbose
