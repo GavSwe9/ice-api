@@ -18,19 +18,19 @@ service: ice-api
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
-frameworkVersion: '3'
+# frameworkVersion: "3"
 
 provider:
   name: aws
   runtime: provided.al2023
-  architecture: arm64 
+  architecture: arm64
   stage: dev
 
   iam:
     role:
       statements:
         - Effect: Allow
-          Action: 
+          Action:
             - secretsmanager:GetSecretValue
           Resource: arn:aws:secretsmanager:us-east-1:271463937680:secret:farm/mysql-Rpzei2
 
@@ -67,7 +67,7 @@ functions:
     package:
       artifact: build/lambda/get-player-shots.zip
     events:
-     - httpApi:
+      - httpApi:
           path: /get-player-shots/{playerId}
           method: get
   getGameShots:
@@ -75,7 +75,7 @@ functions:
     package:
       artifact: build/lambda/get-game-shots.zip
     events:
-     - httpApi:
+      - httpApi:
           path: /get-game-shots/{gamePk}
           method: get
   getTeamStats:
@@ -83,7 +83,7 @@ functions:
     package:
       artifact: build/lambda/get-team-stats.zip
     events:
-     - httpApi:
+      - httpApi:
           path: /get-team-stats/{teamId}/{season}
           method: get
   getLineStats:
@@ -91,7 +91,7 @@ functions:
     package:
       artifact: build/lambda/get-line-stats.zip
     events:
-     - httpApi:
+      - httpApi:
           path: /get-line-stats
           method: post
   getLineInverseStats:
@@ -99,7 +99,7 @@ functions:
     package:
       artifact: build/lambda/get-line-inverse-stats.zip
     events:
-     - httpApi:
+      - httpApi:
           path: /get-line-inverse-stats
           method: post
   getSeasonTeams:
@@ -107,7 +107,7 @@ functions:
     package:
       artifact: build/lambda/get-season-teams.zip
     events:
-     - httpApi:
+      - httpApi:
           path: /get-season-teams/{season}
           method: get
   getSeasonTeamsMap:
@@ -115,7 +115,7 @@ functions:
     package:
       artifact: build/lambda/get-season-teams-map.zip
     events:
-     - httpApi:
+      - httpApi:
           path: /get-season-teams-map/{season}
           method: get
   getSeasonTeamRoster:
@@ -123,7 +123,7 @@ functions:
     package:
       artifact: build/lambda/get-season-team-roster.zip
     events:
-     - httpApi:
+      - httpApi:
           path: /get-season-team-roster/{teamId}/{season}
           method: get
   getLinePlaysWith:
@@ -139,10 +139,41 @@ functions:
     package:
       artifact: build/lambda/get-seasons.zip
     events:
-     - httpApi:
+      - httpApi:
           path: /get-seasons
           method: get
-
+  searchPlayers:
+    handler: bootstrap
+    package:
+      artifact: build/lambda/search.zip
+    events:
+      - httpApi:
+          path: /search/{searchText}
+          method: get
+  getPlayer:
+    handler: bootstrap
+    package:
+      artifact: build/lambda/get-player.zip
+    events:
+      - httpApi:
+          path: /player/{playerId}
+          method: get
+  getTeam:
+    handler: bootstrap
+    package:
+      artifact: build/lambda/get-team.zip
+    events:
+      - httpApi:
+          path: /team/{teamAbv}
+          method: get
+  getTeamDraft:
+    handler: bootstrap
+    package:
+      artifact: build/lambda/get-team-draft.zip
+    events:
+      - httpApi:
+          path: /draft/{teamAbv}/{year}
+          method: get
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
